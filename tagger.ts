@@ -19,7 +19,10 @@ List files with all specified tags:
 $ ./tagger.js album=Hyperdrama artist=Justice
 
 List tags of specific files:
-$ ./tagger.js
+$ ./tagger.js File\ 1.opus File\ 2.opus
+
+List untagged files:
+$ ls | xargs -d '\n' ./tagger.js untagged
 
 Undo last operation:
 $ ./tagger.js undo
@@ -63,6 +66,15 @@ const escape = (path: string) => `"${path}"`;
 
 const dbJson = readFileSync('tags.json').toString();
 const db = JSON.parse(dbJson) as Db;
+
+if (args.some(a => a === 'untagged')) {
+  const untagged = args.filter(
+    a => a !== 'tagged' && !db.some(x => x[0] === a),
+  );
+  console.log(untagged.map(escape).join('\n'));
+  exit(0);
+}
+
 writeFileSync('tags.bak.json', dbJson);
 
 const paths = args.filter(x => x.includes('.'));
